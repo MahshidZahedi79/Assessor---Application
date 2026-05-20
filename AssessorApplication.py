@@ -1,70 +1,62 @@
 import pandas as pd
-import random
+import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 
-data = []
+# 1. Scientific Setup for Reproducibility
+np.random.seed(42) # Ensures the same random numbers are generated every time
+num_users = 30     # Sample size of 30 users
 
-#utilize tesat on 20 assesors, and we visulize to record for each one to show their performance after trying the new version
+# 2. Generating Apps' version1 Data
+# Pain points: Nested folders, slow information access, no internal chat
+old_data = pd.DataFrame({
+    'Version': 'version1',
+    'Time_on_Task': np.random.normal(30, 5, num_users),      # Mean: 30 minutes, Std Dev: 5
+    'Nav_Steps': np.random.poisson(9, num_users),           # Mean: 9 clicks due to nested architecture
+    'Comm_Attempts': np.random.poisson(5, num_users),       # Mean: 5 phone calls needed for support
+    'SUS_Score': np.random.normal(52, 8, num_users)         # Mean Satisfaction: 52 (Marginal/Poor)
+})
 
-for user in range(1,20):
+# 3. Generating Redesign Data (New Version)
+# Solutions: Optimized information architecture, integrated internal chat
+new_data = pd.DataFrame({
+    'Version': 'version2',
+    'Time_on_Task': np.random.normal(15, 2, num_users),      # Mean: 15 minutes (50% faster)
+    'Nav_Steps': np.random.poisson(3, num_users),           # Mean: 3 clicks (Simplified IA)
+    'Comm_Attempts': np.random.poisson(1, num_users),       # Mean: 1 quick chat message for support
+    'SUS_Score': np.random.normal(82, 5, num_users)         # Mean Satisfaction: 82 (Excellent)
+})
 
-    #old version
+# 4. Merge datasets into a single DataFrame for comparison
+df = pd.concat([old_data, new_data])
 
-    data.append([
-        user,
-        "old",
-        random.randint(6, 10), # steps_to_access_form --> user needed between 5–10 steps
-        random.uniform(40, 90),  # time_to_open_form --> opening form took 40–90 seconds
-        random.uniform(15, 30), # form_completion_time --> completing form took 15–30 minutes
-        random.uniform(5, 20), # time_to_get_answer
-        random.randint(2, 5), # communication_attempts --> multiple calls needed
-        random.randint(0, 2), # missed_tasks --> sometimes missed tasks
-        random.randint(2, 15) # schedule_delay
-    ])
+# 5. Visualization: Creating the Performance Dashboard
+plt.style.use('ggplot') # Using a clean, professional graphical style
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
-    data.append([
-        user,
-        "new",
-        random.randint(3, 6), # steps_to_access_form --> user needed between 5–10 steps
-        random.uniform(10, 30),  # time_to_open_form --> opening form took 40–90 seconds
-        random.uniform(8, 18), # form_completion_time --> completing form took 15–30 minutes
-        random.uniform(2, 10), # time_to_get_answer
-        random.randint(1, 2), # communication_attempts --> multiple calls needed
-        random.randint(0, 1), # missed_tasks --> sometimes missed tasks
-        random.randint(0, 10) # schedule_delay
-    ])
+# Chart 1: Efficiency - Time on Task
+sns.barplot(ax=axes[0,0], x='Version', y='Time_on_Task', data=df, palette='Reds_r')
+axes[0,0].set_title('Efficiency: Time on Task (Minutes)')
+axes[0,0].set_ylabel('Avg. Minutes')
 
-columns = [
-    "user_id", "version",
-    "steps_to_access_form",
-    "time_to_open_form",
-    "form_completion_time",
-    "time_to_get_answer",
-    "communication_attempts",
-    "missed_tasks",
-    "schedule_delay"
-]
+# Chart 2: Navigation Depth - Validating the fix for "Nested Folders"
+sns.barplot(ax=axes[0,1], x='Version', y='Nav_Steps', data=df, palette='Blues_r')
+axes[0,1].set_title('Navigation Depth: Number of Clicks')
+axes[0,1].set_ylabel('Avg. Clicks')
 
-df = pd.DataFrame(data, columns = columns )
-grouped = df.groupby('version').mean()
+# Chart 3: Communication Friction - Impact of the Internal Chat feature
+sns.barplot(ax=axes[1,0], x='Version', y='Comm_Attempts', data=df, palette='Oranges_r')
+axes[1,0].set_title('Comm. Friction: Phone Calls vs. Chat Messages')
+axes[1,0].set_ylabel('Avg. Attempts')
 
+# Chart 4: User Satisfaction - System Usability Scale (SUS)
+sns.barplot(ax=axes[1,1], x='Version', y='SUS_Score', data=df, palette='Greens_r')
+axes[1,1].axhline(68, color='red', linestyle='--', label='Industry Avg (68)') # SUS Benchmark
+axes[1,1].set_title('User Satisfaction: SUS Score (0-100)')
+axes[1,1].set_ylabel('Mean Score')
+axes[1,1].legend()
 
-#comparison of average steps to access form
-grouped['steps_to_access_form'].plot(kind = 'bar', title = 'Average Steps to Access Form', xlabel = 'Version',
-ylabel = 'Number of Steps', color = 'yellow')
+# Final Polish and Layout adjustment
+plt.tight_layout()
 plt.show()
 
-# comparison of form completion time
-grouped['form_completion_time'].plot(kind = 'bar', title = 'Average Form Completion Time', xlabel = 'Version',
-ylabel = 'Time (minutes)', color = 'purple')
-plt.show()
-
-# comparison of communication attempts needed
-grouped['communication_attempts'].plot(kind = 'bar', title = 'Communication Attempts Needed', xlabel = 'Version', 
-ylabel = 'Attempts', color = 'pink')
-plt.show()
-
-# comparison of Time to Receive Support
-grouped['time_to_get_answer'].plot(kind = 'bar', title = 'Time to Receive Support', xlabel = 'Version',
-ylabel = 'Time (minutes)', color = 'green')
-plt.show()
