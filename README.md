@@ -29,3 +29,7 @@ This script simulates user performance data to validate the redesign of a vehicl
 
 * `plt.subplots(2, 2)`: Creates a 2x2 grid to show all four metrics simultaneously, allowing for a holistic comparison.
 * **SUS Baseline (68):** A red dashed line is drawn at 68. This is the industry-standard average; showing the redesign above this line proves a "Grade A" user experience.
+
+## Final Graph
+
+<img width="1536" height="762" alt="graph" src="https://github.com/user-attachments/assets/c8cced6f-619e-49fa-87a9-cec4d481f84c" />
